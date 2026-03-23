@@ -13,6 +13,9 @@ class Coupon
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 50, unique: true)]
+    private ?string $code = null;
+
     #[ORM\Column(length: 10)]
     private ?string $type = null;
 
@@ -27,6 +30,18 @@ class Coupon
     public function setId(int $id): static
     {
         $this->id = $id;
+
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): static
+    {
+        $this->code = $code;
 
         return $this;
     }
