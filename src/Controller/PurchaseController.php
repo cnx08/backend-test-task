@@ -5,7 +5,8 @@ namespace App\Controller;
 use App\Entity\Coupon;
 use App\Entity\Product;
 use App\Enum\TaxCountry;
-use App\Request\CalculatePriceRequest;
+use App\Request\PurchaseRequest;
+use App\Service\Payment\PaymentProcessorRegistry;
 use App\Service\PriceCalculator;
 use App\Service\PriceModifier\CouponModifier;
 use App\Service\PriceModifier\TaxModifier;
@@ -15,20 +16,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class PriceController
+class PurchaseController
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly PriceCalculator $calculator,
         private readonly ValidatorInterface $validator,
+        private readonly PaymentProcessorRegistry $paymentRegistry,
     ) {
     }
 
-    #[Route('/calculate-price', methods: ['POST'])]
-    public function calculatePrice(Request $request): JsonResponse
+    #[Route('/purchase', methods: ['POST'])]
+    public function purchase(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $dto = CalculatePriceRequest::fromArray($data ?? []);
+        $dto = PurchaseRequest::fromArray($data ?? []);
 
         $violations = $this->validator->validate($dto);
 
@@ -42,6 +44,7 @@ class PriceController
         }
 
         $product = $this->em->find(Product::class, $dto->product);
+        $processor = $this->paymentRegistry->get($dto->paymentProcessor);
         $country = TaxCountry::fromTaxNumber($dto->taxNumber);
         $modifiers = [];
 
@@ -54,6 +57,12 @@ class PriceController
 
         $price = $this->calculator->calculate((float) $product->getPrice(), ...$modifiers);
 
-        return new JsonResponse(['price' => $price]);
+        try {
+            $processor->pay($price);
+        } catch (\Exception $e) {
+            return new JsonResponse(['errors' => ['payment' => $e->getMessage()]], 400);
+        }
+
+        return new JsonResponse(['message' => 'Payment successful'], 200);
     }
 }

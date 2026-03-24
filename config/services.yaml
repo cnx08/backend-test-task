@@ -24,5 +24,18 @@ services:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
 
+    Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor: ~
+    Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor: ~
+
+    App\Service\Payment\PaypalProcessor:
+        tags: ['app.payment_processor']
+
+    App\Service\Payment\StripeProcessor:
+        tags: ['app.payment_processor']
+
+    App\Service\Payment\PaymentProcessorRegistry:
+        arguments:
+            - !tagged_iterator app.payment_processor
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
