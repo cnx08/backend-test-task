@@ -1,15 +1,122 @@
-### Calculate Price
+###INSERT INTO public.coupon(id, code, type, value)
+###VALUES (1,'D15', 'D', 15),(2,'P10', 'P', 10),(3,'P100', 'P', 100);
+###
+###INSERT INTO public.product(id, name, price)
+###VALUES (1, 'Iphone', 100),(2, 'Наушники', 20),(3, 'Чехол', 10),(4, 'mac pro', 1999);
+
+### Calculate price — valid request (no coupon)
 POST http://127.0.0.1:8337/calculate-price
 Accept: application/json
 Content-Type: application/json
 
 {
   "product": 1,
-  "taxNumber": "DE123456789",
+  "taxNumber": "DE123456789"
+}
+
+###HTTP/1.1 200 OK
+###Host: 127.0.0.1:8337
+###Connection: close
+###X-Powered-By: PHP/8.3.30
+###Cache-Control: no-cache, private
+###Date: Tue, 24 Mar 2026 11:56:14 GMT
+###Content-Type: application/json
+###X-Robots-Tag: noindex
+###
+###{
+###"price": 119
+###}
+
+### Calculate price — valid request (with percent coupon)
+POST http://127.0.0.1:8337/calculate-price
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 1,
+  "taxNumber": "GR123456789",
+  "couponCode": "P6"
+}
+
+###HTTP/1.1 422 Unprocessable Content
+###
+###{
+###    "errors": {
+###        "couponCode": "Coupon \"P6\" does not exist."
+###    }
+###}
+
+### Calculate price — valid request (with fixed coupon)
+POST http://127.0.0.1:8337/calculate-price
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 1,
+  "taxNumber": "IT12345678900",
   "couponCode": "D15"
 }
 
-### Execute Purchase
+###HTTP/1.1 200 OK
+###
+###{
+###"price": 103.7
+###}
+
+### Calculate price — validation error (invalid taxNumber)
+POST http://127.0.0.1:8337/calculate-price
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 1,
+  "taxNumber": "INVALID"
+}
+
+###HTTP/1.1 422 Unprocessable Content
+###
+###{
+###"errors": {
+###"taxNumber": "The tax number \"INVALID\" is invalid."
+###}
+###}
+
+### Calculate price — validation error (nonexistent product)
+POST http://127.0.0.1:8337/calculate-price
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 999,
+  "taxNumber": "DE123456789"
+}
+
+###HTTP/1.1 422 Unprocessable Content
+###
+###{
+###"errors": {
+###"product": "Product with id 999 does not exist."
+###}
+###}
+
+### Purchase — valid request (paypal)
+POST http://127.0.0.1:8337/purchase
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 1,
+  "taxNumber": "DE123456789",
+  "paymentProcessor": "paypal"
+}
+
+###HTTP/1.1 200 OK
+###
+###{
+###"message": "Payment successful"
+###}
+
+### Purchase — valid request (stripe)
 POST http://127.0.0.1:8337/purchase
 Accept: application/json
 Content-Type: application/json
@@ -17,6 +124,87 @@ Content-Type: application/json
 {
   "product": 1,
   "taxNumber": "IT12345678900",
-  "couponCode": "D15",
+  "paymentProcessor": "stripe"
+}
+
+###HTTP/1.1 200 OK
+###
+###{
+###"message": "Payment successful"
+###}
+
+### Purchase — valid request (with no exist coupon)
+POST http://127.0.0.1:8337/purchase
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 1,
+  "taxNumber": "FRAA123456789",
+  "couponCode": "P6",
+  "paymentProcessor": "stripe"
+}
+
+###HTTP/1.1 422 Unprocessable Content
+###
+###{
+###"errors": {
+###"couponCode": "Coupon \"P6\" does not exist."
+###}
+###}
+
+
+### Purchase — payment error (paypal, price too high)
+POST http://127.0.0.1:8337/purchase
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 4,
+  "taxNumber": "GR123456789",
   "paymentProcessor": "paypal"
 }
+
+###HTTP/1.1 400 Bad Request
+###
+###{
+###"errors": {
+###"payment": "[#14271] Transaction \"c82711ca-7e67-41c8-9f35-5b965e645d12\" failed: Too high price"
+###}
+###}
+
+### Purchase — validation error (unknown payment processor)
+POST http://127.0.0.1:8337/purchase
+Accept: application/json
+Content-Type: application/json
+
+{
+  "product": 1,
+  "taxNumber": "DE123456789",
+  "paymentProcessor": "bitcoin"
+}
+
+###HTTP/1.1 422 Unprocessable Content
+###
+###{
+###"errors": {
+###"paymentProcessor": "The payment processor \"bitcoin\" is not supported."
+###}
+###}
+
+### Purchase — validation error (missing fields)
+POST http://127.0.0.1:8337/purchase
+Accept: application/json
+Content-Type: application/json
+
+{}
+
+###HTTP/1.1 422 Unprocessable Content
+###
+###{
+###  "errors": {
+###    "product": "This value should be positive.",
+###    "taxNumber": "This value should not be blank.",
+###    "paymentProcessor": "This value should not be blank."
+###  }
+###}
