@@ -20,6 +20,6 @@ class PriceController extends AbstractController
     {
         $price = $this->priceService->calculatePrice($dto->product, $dto->taxNumber, $dto->couponCode);
 
-        return $this->json(['price' => $price]);
+        return $this->json(['price' => $price / 100]);
     }
 }

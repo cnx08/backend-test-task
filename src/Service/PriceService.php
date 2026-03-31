@@ -30,6 +30,8 @@ class PriceService
 
         $modifiers[] = new TaxModifier($country->getTaxRate());
 
-        return $this->calculator->calculate((float) $product->getPrice(), ...$modifiers);
+        $basePriceInCents = (int) round((float) $product->getPrice() * 100);
+
+        return $this->calculator->calculate($basePriceInCents, ...$modifiers);
     }
 }

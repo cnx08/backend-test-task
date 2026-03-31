@@ -4,5 +4,5 @@ namespace App\Service\PriceModifier;
 
 interface PriceModifierInterface
 {
-    public function apply(float $price): float;
+    public function apply(int $priceInCents): int;
 }

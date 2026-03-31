@@ -7,5 +7,5 @@ interface PaymentProcessorInterface
     public function getName(): string;
 
     /** @throws \Exception on payment failure */
-    public function pay(float $price): void;
+    public function pay(int $priceInCents): void;
 }

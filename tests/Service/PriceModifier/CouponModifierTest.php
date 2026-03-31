@@ -13,7 +13,7 @@ class CouponModifierTest extends TestCase
         $coupon = $this->makeCoupon('D', 15);
         $modifier = new CouponModifier($coupon);
 
-        $this->assertSame(85.0, $modifier->apply(100.0));
+        $this->assertSame(8500, $modifier->apply(10000));
     }
 
     public function testApplyPercentDiscount(): void
@@ -21,7 +21,7 @@ class CouponModifierTest extends TestCase
         $coupon = $this->makeCoupon('P', 10);
         $modifier = new CouponModifier($coupon);
 
-        $this->assertSame(90.0, $modifier->apply(100.0));
+        $this->assertSame(9000, $modifier->apply(10000));
     }
 
     public function testApplyUnknownDiscount(): void
@@ -29,7 +29,7 @@ class CouponModifierTest extends TestCase
         $coupon = $this->makeCoupon('X', 10);
         $modifier = new CouponModifier($coupon);
 
-        $this->assertSame(100.0, $modifier->apply(100.0));
+        $this->assertSame(10000, $modifier->apply(10000));
     }
 
     private function makeCoupon(string $type, int $value): Coupon

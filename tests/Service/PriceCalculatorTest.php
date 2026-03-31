@@ -19,9 +19,9 @@ class PriceCalculatorTest extends TestCase
 
     public function testCalculateWithTax(): void
     {
-        $result = $this->calculator->calculate(100.0, new TaxModifier(0.24));
+        $result = $this->calculator->calculate(10000, new TaxModifier(24));
 
-        $this->assertSame(124.0, $result);
+        $this->assertSame(12400, $result);
     }
 
     public function testCalculateWithPercentCouponAndTax(): void
@@ -31,12 +31,12 @@ class PriceCalculatorTest extends TestCase
         $coupon->method('getValue')->willReturn(6);
 
         $result = $this->calculator->calculate(
-            100.0,
+            10000,
             new CouponModifier($coupon),
-            new TaxModifier(0.24),
+            new TaxModifier(24),
         );
 
-        $this->assertSame(116.56, $result);
+        $this->assertSame(11656, $result);
     }
 
     public function testCalculateWithFixedCouponAndTax(): void
@@ -46,11 +46,11 @@ class PriceCalculatorTest extends TestCase
         $coupon->method('getValue')->willReturn(15);
 
         $result = $this->calculator->calculate(
-            100.0,
+            10000,
             new CouponModifier($coupon),
-            new TaxModifier(0.19),
+            new TaxModifier(19),
         );
 
-        $this->assertSame(101.15, $result);
+        $this->assertSame(10115, $result);
     }
 }

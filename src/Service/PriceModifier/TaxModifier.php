@@ -4,12 +4,12 @@ namespace App\Service\PriceModifier;
 
 class TaxModifier implements PriceModifierInterface
 {
-    public function __construct(private readonly float $taxRate)
+    public function __construct(private readonly int $taxRatePercent)
     {
     }
 
-    public function apply(float $price): float
+    public function apply(int $priceInCents): int
     {
-        return $price * (1 + $this->taxRate);
+        return (int) round($priceInCents * (100 + $this->taxRatePercent) / 100);
     }
 }

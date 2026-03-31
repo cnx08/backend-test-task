@@ -15,9 +15,9 @@ class StripeProcessor implements PaymentProcessorInterface
         return 'stripe';
     }
 
-    public function pay(float $price): void
+    public function pay(int $priceInCents): void
     {
-        $result = $this->processor->processPayment($price);
+        $result = $this->processor->processPayment($priceInCents / 100);
 
         if (!$result) {
             throw new \Exception('Stripe payment failed');

@@ -19,13 +19,13 @@ enum TaxCountry: string
         };
     }
 
-    public function getTaxRate(): float
+    public function getTaxRate(): int
     {
         return match($this) {
-            self::Germany => 0.19,
-            self::Italy   => 0.22,
-            self::Greece  => 0.24,
-            self::France  => 0.20,
+            self::Germany => 19,
+            self::Italy   => 22,
+            self::Greece  => 24,
+            self::France  => 20,
         };
     }
 

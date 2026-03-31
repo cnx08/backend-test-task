@@ -6,14 +6,14 @@ use App\Service\PriceModifier\PriceModifierInterface;
 
 class PriceCalculator
 {
-    public function calculate(float $basePrice, PriceModifierInterface ...$modifiers): float
+    public function calculate(int $basePriceInCents, PriceModifierInterface ...$modifiers): int
     {
-        $price = $basePrice;
+        $price = $basePriceInCents;
 
         foreach ($modifiers as $modifier) {
             $price = $modifier->apply($price);
         }
 
-        return round($price, 2);
+        return $price;
     }
 }

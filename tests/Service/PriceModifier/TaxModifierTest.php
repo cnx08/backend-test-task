@@ -9,9 +9,8 @@ class TaxModifierTest extends TestCase
 {
     public function testApplyTax(): void
     {
-        $modifier = new TaxModifier(0.19);
+        $modifier = new TaxModifier(19);
 
-        $this->assertSame(119.0, $modifier->apply(100.0));
+        $this->assertSame(11900, $modifier->apply(10000));
     }
-
 }

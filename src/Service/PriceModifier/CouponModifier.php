@@ -10,12 +10,12 @@ class CouponModifier implements PriceModifierInterface
     {
     }
 
-    public function apply(float $price): float
+    public function apply(int $priceInCents): int
     {
         return match($this->coupon->getType()) {
-            'P' => $price * (1 - $this->coupon->getValue() / 100),
-            'D' => $price - $this->coupon->getValue(),
-            default => $price,
+            'P' => (int) round($priceInCents * (100 - $this->coupon->getValue()) / 100),
+            'D' => $priceInCents - $this->coupon->getValue() * 100,
+            default => $priceInCents,
         };
     }
 }

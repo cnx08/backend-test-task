@@ -21,7 +21,7 @@ class TaxCountryTest extends TestCase
     }
 
     #[DataProvider('taxRateProvider')]
-    public function testGetTaxRate(TaxCountry $country, float $expectedRate): void
+    public function testGetTaxRate(TaxCountry $country, int $expectedRate): void
     {
         $this->assertSame($expectedRate, $country->getTaxRate());
     }
@@ -54,10 +54,10 @@ class TaxCountryTest extends TestCase
     public static function taxRateProvider(): array
     {
         return [
-            'Germany' => [TaxCountry::Germany, 0.19],
-            'Italy'   => [TaxCountry::Italy, 0.22],
-            'Greece'  => [TaxCountry::Greece, 0.24],
-            'France'  => [TaxCountry::France, 0.20],
+            'Germany' => [TaxCountry::Germany, 19],
+            'Italy'   => [TaxCountry::Italy, 22],
+            'Greece'  => [TaxCountry::Greece, 24],
+            'France'  => [TaxCountry::France, 20],
         ];
     }
 }

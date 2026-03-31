@@ -15,8 +15,8 @@ class PaypalProcessor implements PaymentProcessorInterface
         return 'paypal';
     }
 
-    public function pay(float $price): void
+    public function pay(int $priceInCents): void
     {
-        $this->processor->pay((int) round($price * 100));
+        $this->processor->pay($priceInCents);
     }
 }
