@@ -2,58 +2,24 @@
 
 namespace App\Controller;
 
-use App\Entity\Coupon;
-use App\Entity\Product;
-use App\Enum\TaxCountry;
 use App\Request\CalculatePriceRequest;
-use App\Service\PriceCalculator;
-use App\Service\PriceModifier\CouponModifier;
-use App\Service\PriceModifier\TaxModifier;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\PriceService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class PriceController
+class PriceController extends AbstractController
 {
-    public function __construct(
-        private readonly EntityManagerInterface $em,
-        private readonly PriceCalculator $calculator,
-        private readonly ValidatorInterface $validator,
-    ) {
+    public function __construct(private readonly PriceService $priceService)
+    {
     }
 
     #[Route('/calculate-price', methods: ['POST'])]
-    public function calculatePrice(Request $request): JsonResponse
+    public function calculatePrice(#[MapRequestPayload] CalculatePriceRequest $dto): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $dto = CalculatePriceRequest::fromArray($data ?? []);
+        $price = $this->priceService->calculatePrice($dto->product, $dto->taxNumber, $dto->couponCode);
 
-        $violations = $this->validator->validate($dto);
-
-        if (count($violations) > 0) {
-            $errors = [];
-            foreach ($violations as $violation) {
-                $errors[$violation->getPropertyPath()] = $violation->getMessage();
-            }
-
-            return new JsonResponse(['errors' => $errors], 422);
-        }
-
-        $product = $this->em->find(Product::class, $dto->product);
-        $country = TaxCountry::fromTaxNumber($dto->taxNumber);
-        $modifiers = [];
-
-        if ($dto->couponCode !== null) {
-            $coupon = $this->em->getRepository(Coupon::class)->findOneBy(['code' => $dto->couponCode]);
-            $modifiers[] = new CouponModifier($coupon);
-        }
-
-        $modifiers[] = new TaxModifier($country->getTaxRate());
-
-        $price = $this->calculator->calculate((float) $product->getPrice(), ...$modifiers);
-
-        return new JsonResponse(['price' => $price]);
+        return $this->json(['price' => $price]);
     }
 }

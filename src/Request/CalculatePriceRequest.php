@@ -21,13 +21,4 @@ class CalculatePriceRequest
     #[ValidCoupon]
     public ?string $couponCode = null;
 
-    public static function fromArray(array $data): self
-    {
-        $dto = new self();
-        $dto->product = (int) ($data['product'] ?? 0);
-        $dto->taxNumber = (string) ($data['taxNumber'] ?? '');
-        $dto->couponCode = $data['couponCode'] ?? null;
-
-        return $dto;
-    }
 }
